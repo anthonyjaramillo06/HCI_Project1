@@ -69,7 +69,7 @@ let groupOverlayDismissed = false;
 let groupOverlayReady = true;
 let currentPage = 0;
 const DESKTOP_MOVIES_PER_PAGE = 3;
-const MOBILE_MOVIES_PER_PAGE = 1;
+const MOBILE_MOVIES_PER_PAGE = 2;
 const MOBILE_BREAKPOINT = 640;
 const customSelectMap = new WeakMap();
 
