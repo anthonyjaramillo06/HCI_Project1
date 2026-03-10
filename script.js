@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cinetrack-movies-v3";
+const STORAGE_KEY = "cinetrack-movies-v4";
 const POSTER_SEARCH_URL = "https://itunes.apple.com/search";
 
 const statusLabels = {
@@ -68,7 +68,9 @@ let activeGroupBy = "none";
 let groupOverlayDismissed = false;
 let groupOverlayReady = true;
 let currentPage = 0;
-const MOVIES_PER_PAGE = 3;
+const DESKTOP_MOVIES_PER_PAGE = 3;
+const MOBILE_MOVIES_PER_PAGE = 1;
+const MOBILE_BREAKPOINT = 640;
 const customSelectMap = new WeakMap();
 
 ui.addBtn.addEventListener("click", openAddModal);
@@ -104,6 +106,7 @@ ui.next.addEventListener("click", () => moveFocusBy(1));
 ui.list.addEventListener("click", onListClick);
 window.addEventListener("keydown", onArrowNav);
 window.addEventListener("keydown", onGlobalKeydown);
+window.addEventListener("resize", onViewportResize);
 document.addEventListener("click", onDocumentClick);
 
 initCustomSelects();
@@ -123,23 +126,87 @@ function loadMovies() {
 }
 
 function starterMovies() {
-  const now = Date.now();
   return [
     {
-      id: crypto.randomUUID(),
+      id: "a552acb2-3a0a-40bc-bab1-7c38b7dea60a",
+      title: "Harry Potter and the Goblet of Fire",
+      director: "Mike Newell",
+      genre: "Action/Adventure",
+      series: "Harry Potter",
+      year: 2005,
+      status: "watched",
+      rating: 2,
+      posterUrl: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQynNka8fnGlaaWkc8FP2VD1Zu8kldj6GqQL4XH3UFZjWr5xT4r",
+      posterLookupTried: true,
+      createdAt: 1773131252178,
+    },
+    {
+      id: "9b428e0d-b632-46ab-9d29-05c5b4087265",
+      title: "Harry Potter and the Sorcerer's Stone",
+      director: "Chris Columbus",
+      genre: "Action/Adventure",
+      series: "Harry Potter",
+      year: 2001,
+      status: "watched",
+      rating: 5,
+      posterUrl: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQcZT3sdwr1NiJytvJb95icJJKPWpWRNv35l_uuVYxjlzBJS-hb",
+      posterLookupTried: true,
+      createdAt: 1773131186727,
+    },
+    {
+      id: "d7a3d559-a598-4071-83a3-91c17092ea9b",
+      title: "Memento",
+      director: "David Fincher",
+      genre: "Drama",
+      series: "",
+      year: 2000,
+      status: "to-watch",
+      rating: 0,
+      posterUrl: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTUpCusgz8y6aQMJivmWnIWJt6K9M_m_woT8fKP4CSHwL1RFyBc",
+      posterLookupTried: true,
+      createdAt: 1773130989096,
+    },
+    {
+      id: "5a5f2c59-470a-4436-a02b-992ce939aeaf",
+      title: "Dazed and Confused",
+      director: "Richard Linklater",
+      genre: "Comedy",
+      series: "",
+      year: 1993,
+      status: "watched",
+      rating: 4,
+      posterUrl: "https://image.tmdb.org/t/p/original/msG9awbLhVZwv1Eh9Ge7SofMexW.jpg",
+      posterLookupTried: true,
+      createdAt: 1773129512123,
+    },
+    {
+      id: "dd44a11b-912e-4be8-abc0-1c0f91917194",
+      title: "Ocean's Eleven",
+      director: "Steven Soderbergh",
+      genre: "Drama",
+      series: "",
+      year: 2001,
+      status: "to-watch",
+      rating: 0,
+      posterUrl: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQDg_J2BeJx3fa5qaTSIjBzchs8FIumo63waMXxLOJBfkYvYaC1",
+      posterLookupTried: true,
+      createdAt: 1773128045031,
+    },
+    {
+      id: "c1750bda-ec3d-4055-adf6-7562836b3db1",
       title: "Interstellar",
       director: "Christopher Nolan",
       genre: "Sci-Fi",
       series: "",
       year: 2014,
       status: "watched",
-      rating: 5,
-      posterUrl: "",
-      posterLookupTried: false,
-      createdAt: now - 5000,
+      rating: 4,
+      posterUrl: "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg",
+      posterLookupTried: true,
+      createdAt: 1773122951106,
     },
     {
-      id: crypto.randomUUID(),
+      id: "54d7130e-2a16-425b-8ffe-c0eb5656a5ae",
       title: "Parasite",
       director: "Bong Joon-ho",
       genre: "Thriller",
@@ -147,48 +214,35 @@ function starterMovies() {
       year: 2019,
       status: "watched",
       rating: 5,
-      posterUrl: "",
-      posterLookupTried: false,
-      createdAt: now - 4000,
+      posterUrl: "https://upload.wikimedia.org/wikipedia/en/5/53/Parasite_%282019_film%29.png",
+      posterLookupTried: true,
+      createdAt: 1773122952106,
     },
     {
-      id: crypto.randomUUID(),
-      title: "Spider-Man: Into the Spider-Verse",
-      director: "Persichetti, Ramsey, Rothman",
-      genre: "Animation",
-      series: "Spider-Verse",
-      year: 2018,
-      status: "watching",
-      rating: 0,
-      posterUrl: "",
-      posterLookupTried: false,
-      createdAt: now - 3000,
-    },
-    {
-      id: crypto.randomUUID(),
+      id: "91c3bd98-cd3d-4707-bae4-199383185fb4",
       title: "The Social Network",
       director: "David Fincher",
       genre: "Drama",
       series: "",
       year: 2010,
-      status: "to-watch",
-      rating: 0,
-      posterUrl: "",
-      posterLookupTried: false,
-      createdAt: now - 2000,
+      status: "watched",
+      rating: 5,
+      posterUrl: "https://upload.wikimedia.org/wikipedia/en/8/8c/The_Social_Network_film_poster.png",
+      posterLookupTried: true,
+      createdAt: 1773122954106,
     },
     {
-      id: crypto.randomUUID(),
+      id: "5d49a4b4-25eb-4334-97cb-8d79557ccb80",
       title: "Dune: Part Two",
       director: "Denis Villeneuve",
       genre: "Sci-Fi",
-      series: "Dune",
+      series: "",
       year: 2024,
-      status: "to-watch",
-      rating: 0,
-      posterUrl: "",
-      posterLookupTried: false,
-      createdAt: now - 1000,
+      status: "watched",
+      rating: 1,
+      posterUrl: "https://upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg",
+      posterLookupTried: true,
+      createdAt: 1773122955106,
     },
   ];
 }
@@ -346,7 +400,7 @@ function onArrowNav(event) {
 function moveFocusBy(delta) {
   const visible = getVisibleMovies();
   if (visible.length === 0) return;
-  const totalPages = Math.max(1, Math.ceil(visible.length / MOVIES_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(visible.length / getMoviesPerPage()));
   currentPage = Math.min(Math.max(currentPage + delta, 0), totalPages - 1);
   render();
 }
@@ -386,11 +440,12 @@ function getVisibleMovies() {
 
 function render() {
   const visible = getVisibleMovies();
-  const totalPages = Math.max(1, Math.ceil(visible.length / MOVIES_PER_PAGE));
+  const moviesPerPage = getMoviesPerPage();
+  const totalPages = Math.max(1, Math.ceil(visible.length / moviesPerPage));
   currentPage = Math.min(Math.max(currentPage, 0), totalPages - 1);
 
-  const start = currentPage * MOVIES_PER_PAGE;
-  const end = Math.min(start + MOVIES_PER_PAGE, visible.length);
+  const start = currentPage * moviesPerPage;
+  const end = Math.min(start + moviesPerPage, visible.length);
   const pageItems = visible.slice(start, end);
 
   if (!pageItems.some((movie) => movie.id === focusedMovieId)) {
@@ -415,6 +470,14 @@ function render() {
     .join("");
 
   hydrateVisiblePosters(pageItems);
+}
+
+function getMoviesPerPage() {
+  return window.innerWidth <= MOBILE_BREAKPOINT ? MOBILE_MOVIES_PER_PAGE : DESKTOP_MOVIES_PER_PAGE;
+}
+
+function onViewportResize() {
+  render();
 }
 
 function renderMovie(movie, isActive) {
