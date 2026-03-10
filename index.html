@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CineTrack</title>
+    <meta
+      name="description"
+      content="CineTrack is a compact movie tracker with poster-first arrow navigation."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <h1>CineTrack</h1>
+      </header>
+
+      <section class="rolodex-wrap" aria-label="Movie list">
+        <div class="rolodex-head">
+          <div class="quick-actions">
+            <div class="action-group">
+              <button id="add-btn" class="add-btn" type="button" aria-label="Add movie">+</button>
+              <span class="quick-label">Add to your list</span>
+            </div>
+            <div class="action-group">
+              <button id="search-btn" class="search-btn icon-btn" type="button" aria-label="Search movies">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M10.5 3.75a6.75 6.75 0 1 0 4.19 12.05l4.26 4.26a.75.75 0 1 0 1.06-1.06l-4.26-4.26A6.75 6.75 0 0 0 10.5 3.75Zm0 1.5a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+              <span class="quick-label">Search your list</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="empty-state" class="empty-state">No movies match this view yet.</div>
+
+        <div class="viewer" aria-live="polite">
+          <button id="prev-btn" class="nav-btn" type="button" aria-label="Previous movie">◀</button>
+          <div id="rolodex" class="rolodex"></div>
+          <button id="next-btn" class="nav-btn" type="button" aria-label="Next movie">▶</button>
+        </div>
+        <p id="page-indicator" class="page-indicator">Page 1 of 1</p>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" aria-live="polite" hidden>
+      <span id="toast-text" class="toast-text"></span>
+      <button id="toast-close" class="notice-close" type="button" aria-label="Close message">×</button>
+    </div>
+    <div id="watched-celebration" class="watched-celebration" aria-hidden="true" hidden>
+      <span id="watched-text">Watched ✓</span>
+      <button id="watched-close" class="notice-close" type="button" aria-label="Close watched message">×</button>
+    </div>
+
+    <aside id="group-overlay" class="group-overlay" hidden>
+      <header class="group-overlay-head">
+        <h2 id="group-overlay-title" class="group-overlay-title">Group Summary</h2>
+        <button id="group-overlay-close" class="group-overlay-close" type="button" aria-label="Close group summary">×</button>
+      </header>
+      <section id="group-summary" class="group-summary"></section>
+    </aside>
+
+    <div id="add-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
+        <h2 id="add-modal-title">Add Movie</h2>
+        <form id="add-modal-form" class="modal-form" novalidate>
+          <label>
+            <span>Title</span>
+            <input id="modal-title" name="title" maxlength="120" required />
+          </label>
+          <label>
+            <span>Director</span>
+            <input id="modal-director" name="director" maxlength="120" required />
+          </label>
+          <label>
+            <span>Genre</span>
+            <select id="modal-genre" name="genre" class="modal-select" required>
+              <option value="Comedy">Comedy</option>
+              <option value="Romance">Romance</option>
+              <option value="Drama">Drama</option>
+              <option value="Action/Adventure">Action/Adventure</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Thriller">Thriller</option>
+            </select>
+          </label>
+          <label>
+            <span>Series/Franchise (optional)</span>
+            <input id="modal-series" name="series" maxlength="120" placeholder="e.g., Dune Saga" />
+          </label>
+          <label>
+            <span>Year</span>
+            <input id="modal-year" name="year" type="number" min="1888" max="2100" required />
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="modal-status" name="status" class="modal-select">
+              <option value="to-watch">To Watch</option>
+              <option value="watching">Watching</option>
+              <option value="watched">Watched</option>
+            </select>
+          </label>
+          <label>
+            <span>Poster URL (optional)</span>
+            <input id="modal-poster-url" name="posterUrl" placeholder="https://..." />
+          </label>
+          <div class="modal-actions">
+            <button id="modal-cancel" type="button" class="modal-cancel">Cancel</button>
+            <button type="submit" class="modal-submit">Add Movie</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="delete-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+        <h2 id="delete-modal-title">Delete Movie</h2>
+        <p class="modal-message" id="delete-modal-message"></p>
+        <div class="modal-actions">
+          <button id="delete-cancel" type="button" class="modal-cancel">Cancel</button>
+          <button id="delete-confirm" type="button" class="modal-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="edit-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+        <h2 id="edit-modal-title">Edit Movie</h2>
+        <form id="edit-modal-form" class="modal-form" novalidate>
+          <label>
+            <span>Status</span>
+            <select id="edit-status" name="status" class="modal-select">
+              <option value="to-watch">To Watch</option>
+              <option value="watching">Watching</option>
+              <option value="watched">Watched</option>
+            </select>
+          </label>
+          <label>
+            <span>Genre</span>
+            <select id="edit-genre" name="genre" class="modal-select">
+              <option value="Comedy">Comedy</option>
+              <option value="Romance">Romance</option>
+              <option value="Drama">Drama</option>
+              <option value="Action/Adventure">Action/Adventure</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Thriller">Thriller</option>
+            </select>
+          </label>
+          <label>
+            <span>Rating</span>
+            <select id="edit-rating" name="rating" class="modal-select">
+              <option value="0">Not Rated</option>
+              <option value="1">1 Star</option>
+              <option value="2">2 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="5">5 Stars</option>
+            </select>
+          </label>
+          <p class="modal-note" id="edit-rating-note">Rating is available when status is set to Watched.</p>
+          <div class="modal-actions">
+            <button id="edit-delete" type="button" class="modal-danger">Delete Movie</button>
+            <button id="edit-cancel" type="button" class="modal-cancel">Cancel</button>
+            <button type="submit" class="modal-submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="confirm-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+        <h2 id="confirm-modal-title">Confirm Changes</h2>
+        <p class="modal-message" id="confirm-modal-message"></p>
+        <div class="modal-actions">
+          <button id="confirm-cancel" type="button" class="modal-cancel">Cancel</button>
+          <button id="confirm-apply" type="button" class="modal-submit">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="search-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+        <h2 id="search-modal-title">Search Movies</h2>
+        <form id="search-modal-form" class="modal-form" novalidate>
+          <label>
+            <span>Title or director</span>
+            <input id="search-query" name="query" type="search" placeholder="Type a keyword..." />
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="search-filter" name="filter" class="modal-select">
+              <option value="all">All</option>
+              <option value="to-watch">To Watch</option>
+              <option value="watching">Watching</option>
+              <option value="watched">Watched</option>
+            </select>
+          </label>
+          <label>
+            <span>Genre</span>
+            <select id="search-genre" name="genre" class="modal-select">
+              <option value="all">All</option>
+              <option value="Comedy">Comedy</option>
+              <option value="Romance">Romance</option>
+              <option value="Drama">Drama</option>
+              <option value="Action/Adventure">Action/Adventure</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Thriller">Thriller</option>
+            </select>
+          </label>
+          <label>
+            <span>Sort</span>
+            <select id="search-sort" name="sort" class="modal-select">
+              <option value="newest">Newest</option>
+              <option value="title">Title (A-Z)</option>
+              <option value="director">Director (A-Z)</option>
+              <option value="year">Year (Newest)</option>
+              <option value="rating">Rating (High-Low)</option>
+            </select>
+          </label>
+          <label>
+            <span>Group By</span>
+            <select id="search-group-by" name="groupBy" class="modal-select">
+              <option value="none">None</option>
+              <option value="series">Series/Franchise</option>
+              <option value="director">Director</option>
+            </select>
+          </label>
+          <div class="modal-actions">
+            <button id="search-clear" type="button" class="modal-cancel">Clear</button>
+            <button id="search-cancel" type="button" class="modal-cancel">Cancel</button>
+            <button type="submit" class="modal-submit">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="./script.js" defer></script>
+  </body>
+</html>
